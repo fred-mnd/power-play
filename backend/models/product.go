@@ -8,6 +8,5 @@ type Product struct {
 	Desc        string
 	Price       int
 	ProductType []Type `gorm:"many2many:product_type"`
-	Bluetooth   bool
-	Rehargable  bool
+	ImgUrl string
 }

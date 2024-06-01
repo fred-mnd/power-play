@@ -9,7 +9,6 @@ export default function MainLayout({ children }: ContentLayout) {
   return (
     <div className="container">
       {/* Navigation Bar VVV */}
-      <Navbar></Navbar>
 
       {/* ---------------------------------- */}
 

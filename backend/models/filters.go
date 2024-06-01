@@ -1,15 +1,26 @@
 package models
 
-type MouseFilter struct {
-	ProductID   uint `gorm:"primaryKey"`
-	Product     Product
-	SilentClick bool
-	Size        string
+import "gorm.io/gorm"
+
+type FilterName struct {
+	gorm.Model
+	Name string
+	FilterType string `gorm:"type:enum('boolean', 'string', 'options')"`
+	ProductType[] Type `gorm:"many2many:filter_product_type"`
 }
 
-type KeyboardFilter struct {
-	ProductID uint `gorm:"primaryKey"`
-	Product   Product
-	TenKey    bool
-	Backlit   bool
+type FilterOption struct {
+	gorm.Model
+    FilterID int
+    OptionValue string
+    Filter FilterName `gorm:"foreignKey:FilterID"`
+}
+
+type ProductFilterValue struct {
+	gorm.Model
+    ProductID int
+    FilterID  int
+    Value     string
+    Product   Product `gorm:"foreignKey:ProductID"`
+    Filter    FilterName  `gorm:"foreignKey:FilterID"`
 }
