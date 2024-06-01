@@ -4,6 +4,7 @@ import MainLayout from './layouts/layout';
 import MiddlewareRoutes from './middlewares/middleware-route';
 import Home from './pages/home-page';
 import Login from './pages/login-page';
+import Register from './pages/register-page';
 
 function App() {
   return (
@@ -12,7 +13,7 @@ function App() {
         <MainLayout>
           <Routes>
             <Route path="/login" element={<Login></Login>}></Route>
-            <Route path="/register" element={<Home></Home>}></Route>
+            <Route path="/register" element={<Register></Register>}></Route>
 
             <Route
               path="/*"
