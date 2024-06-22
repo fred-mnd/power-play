@@ -5,7 +5,7 @@ import "gorm.io/gorm"
 type FilterName struct {
 	gorm.Model
 	Name string
-	FilterType string `gorm:"type:enum('boolean', 'string', 'options')"`
+	FilterType string `gorm:"type:enum('boolean', 'options')"`
 	ProductType[] Type `gorm:"many2many:filter_product_type"`
 }
 
@@ -13,7 +13,6 @@ type FilterOption struct {
 	gorm.Model
     FilterID int
     OptionValue string
-    Filter FilterName `gorm:"foreignKey:FilterID"`
 }
 
 type ProductFilterValue struct {

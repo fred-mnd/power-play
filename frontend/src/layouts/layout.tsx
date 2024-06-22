@@ -9,7 +9,7 @@ export default function MainLayout({ children }: ContentLayout) {
   return (
     <div className="container">
       {/* Navigation Bar VVV */}
-
+      <Navbar></Navbar>
       {/* ---------------------------------- */}
 
       {/* All Content will be inside this div (chidren) VVV */}

@@ -38,7 +38,7 @@ export default function Login() {
 
   return (
     <div className="flex gap-5 justify-between w-dvw h-dvh pr-11 text-sky-900 bg-sky-200 max-md:flex-wrap max-md:pr-5">
-      <div className="flex flex-col justify-center w-2/6 min-w-96 px-14 bg-white max-md:max-w-full">
+      <div className="flex flex-col justify-center w-2/d min-w-96 px-14 bg-white max-md:max-w-full">
         <div className="text-4xl leading-10 my-5 font-bold font-round tracking-wider">
           Welcome Back!
         </div>

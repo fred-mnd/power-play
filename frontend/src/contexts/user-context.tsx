@@ -1,13 +1,21 @@
 import { createContext, useContext, useState } from "react";
+import { IUser } from "../interfaces/user-interface";
 
-const userContext = createContext({} as any);
+const userContext = createContext<{auth: IUser|null}>({auth: null});
 
 type ContentLayout = {
   children: JSX.Element;
 };
 
 export function UserProvider({ children }: ContentLayout) {
-  const [auth, setAuth] = useState(false);
+  const [auth, setAuth] = useState<IUser|null>({
+    ID: 1,
+    Name: "efzet",
+    Email: "efzet@gmail.com",
+    PhoneNumber: "08111223",
+    Address: "Jl. Efzet",
+    Money: 100000
+  });
 
   // Authenticate logic here VVV
   function isAuth() {

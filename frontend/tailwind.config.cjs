@@ -7,8 +7,9 @@ module.exports = {
     extend: {
       fontFamily:{
         'round': ['"Varela Round"', 'sans-serif']
-      }
+      },
     },
+    
   },
   plugins: [],
 }
