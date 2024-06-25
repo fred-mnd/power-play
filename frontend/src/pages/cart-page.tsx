@@ -1,8 +1,8 @@
 import { useEffect, useState } from "react";
 import { ICart, IProductCart } from "../interfaces/product-interface";
-import { useUserAuth } from "../contexts/user-context";
 import axios from "axios";
 import { CountOrder } from "../components/counter";
+import { useUser } from "../contexts/user-context";
 
 interface CartItemProps {
   product: IProductCart;
@@ -28,11 +28,11 @@ const CartItem: React.FC<CartItemProps> = ({ product }) => {
 export const CartPage: React.FC = () => {
   const [cart, setCart] = useState<ICart>();
 
-  const { auth } = useUserAuth();
+  const { user } = useUser();
 
   async function fetchCart() {
     try {
-      const response = await axios.get(`http://localhost:8000/carts/get-cart/${auth?.ID}`);
+      const response = await axios.get(`http://localhost:8000/carts/get-cart/${user?.ID}`);
       setCart(response.data);
     } catch (error) {
       console.log(error);

@@ -17,6 +17,17 @@ func main() {
 		AllowCredentials: true,
 	}))
 
+	r.POST("/register", controller.Register)
+	r.GET("/validate", controller.GetUserFromJWT)
+	r.POST("/login", controller.LoginHandler)
+	r.GET("/logout", controller.LogoutHandler)
+
+	user := r.Group("/users")
+	{
+		user.GET("/:id", controller.GetUser)
+		// user.POST("/update", controller.UpdateUser)
+	}
+
 	prod := r.Group("/products")
 	{
 		prod.GET("/get-all", controller.GetAllProduct)

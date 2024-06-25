@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useUser } from "../contexts/user-context";
 
 interface InputFieldProps {
   label: string;
@@ -28,12 +30,20 @@ const InputField: React.FC<InputFieldProps> = ({ label, type, value, onChange })
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const { login } = useUser();
+  const navigate = useNavigate();
 
-  const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleLogin = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // Add login logic here
-    console.log("Email:", email);
-    console.log("Password:", password);
+    const res = await login(email, password);
+    if (res === '') {
+      setEmail('');
+      setPassword('');
+      navigate('/catalog');
+    } else {
+      setError(res);
+    }
   };
 
   return (
@@ -45,6 +55,7 @@ export default function Login() {
         <form onSubmit={handleLogin} className="flex flex-col justify-center max-md:mt-10 max-md:max-w-full">
           <InputField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
           <InputField label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
+          {error && <p className="text-red-500 mt-4">{error}</p>}
           <button
             type="submit"
             className="justify-center items-center mt-12 max-w-full text-xl font-bold tracking-wide leading-6 text-center text-white uppercase whitespace-nowrap rounded-2xl w-24 h-11 max-md:px-5 max-md:mt-10 bg-sky-900 hover:bg-sky-700 transition-colors"
@@ -64,6 +75,3 @@ export default function Login() {
     </div>
   );
 }
-
-
-

@@ -1,25 +1,31 @@
-import { BrowserRouter, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Route, Routes, Outlet } from 'react-router-dom';
 import { UserProvider } from './contexts/user-context';
-import MainLayout from './layouts/layout';
 import MiddlewareRoutes from './middlewares/middleware-route';
-import Home from './pages/catalog-page';
 import Login from './pages/login-page';
 import Register from './pages/register-page';
+import Home from './pages/home-page';
+import Catalog from './pages/catalog-page';
+import Navbar from './components/navbar';
+
+const MainLayout: React.FC = () => (
+  <div>
+    <Navbar />
+    <Outlet />
+  </div>
+);
 
 function App() {
   return (
     <BrowserRouter>
       <UserProvider>
-          <Routes>
-            <Route path="/login" element={<Login></Login>}></Route>
-            <Route path="/register" element={<Register></Register>}></Route>
-
-            <Route
-              path="/*"
-              element={<MiddlewareRoutes></MiddlewareRoutes>}
-            ></Route>
-
-          </Routes>
+        <Routes>
+          <Route element={<MainLayout />}>
+            <Route path="/" element={<Home />} />  
+          </Route>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/*" element={<MiddlewareRoutes />} />
+        </Routes>
       </UserProvider>
     </BrowserRouter>
   );

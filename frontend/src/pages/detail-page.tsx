@@ -2,18 +2,17 @@ import { useEffect, useState } from "react";
 import { IProducts } from "../interfaces/product-interface";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
-import { useUserAuth } from "../contexts/user-context";
 import { FilterOption, IFilterDetails, ISpecs } from "../interfaces/filter-interface";
 import { CountOrder } from "../components/counter";
+import { useUser } from "../contexts/user-context";
 
 export default function DetailsPage(){
   const [product, setProduct] = useState<IProducts>()
   const [order, setOrder] = useState(1);
   const [specs, setSpecs] = useState<ISpecs[]>([])
+  const { user } = useUser();
 
   const {id} = useParams()
-
-  const {auth} = useUserAuth()
 
   const navigate = useNavigate()
 
@@ -39,7 +38,7 @@ export default function DetailsPage(){
   const AddCartHandle = async () => {
     try {
       await axios.post('http://localhost:8000/carts/add-to-cart', {
-        UserID: auth?.ID,
+        UserID: user?.ID,
         ProductID: product?.ID,
         Quantity: order
       })

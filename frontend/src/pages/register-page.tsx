@@ -1,4 +1,6 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
+import axios from 'axios';
+import { useNavigate } from 'react-router-dom'; 
 
 interface InputFieldProps {
   label: string;
@@ -32,16 +34,28 @@ export default function Register() {
   const [confirm, setConfirm] = useState("");
   const [address, setAddress] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
+  const [error, setError] = useState("");
+  const navigate = useNavigate(); 
 
-  const handleLogin = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleRegister = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    // Add login logic here
-    console.log("Full Name:", fullName);
-    console.log("Email:", email);
-    console.log("Password:", password);
-    console.log("Confirm:", confirm);
-    console.log("Address:", address);
-    console.log("Phone Number:", phoneNumber);
+    try {
+      const response = await axios.post("http://localhost:8000/register", {
+        name: fullName,
+        email: email,
+        password: password,
+        confirm: confirm,
+        address: address,
+        phoneNumber: phoneNumber
+      });
+      setError('');
+      if(response.status === 200){
+        navigate('/login');
+      }
+    } catch (error: any) {
+      console.log('An error occurred:', error.response?.data.error || 'Unknown error');
+      setError(error.response?.data.error || 'An error occurred');
+    }
   };
 
   return (
@@ -51,19 +65,20 @@ export default function Register() {
           <div className="text-4xl leading-10 my-5 font-bold font-round tracking-wider">
             Register
           </div>
-          <form onSubmit={handleLogin} className="flex flex-col justify-center max-md:mt-10 max-md:max-w-full">
+          <form onSubmit={handleRegister} className="flex flex-col justify-center max-md:mt-10 max-md:max-w-full">
             <InputField label="Full Name" type="text" value={fullName} onChange={(e) => setFullName(e.target.value)} />
             <InputField label="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
             <InputField label="Password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} />
-            <InputField label="Confirm" type="confirm" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
-            <InputField label="Address" type="address" value={address} onChange={(e) => setAddress(e.target.value)} />
-            <InputField label="Phone Number" type="phoneNumber" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+            <InputField label="Confirm" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} />
+            <InputField label="Address" type="text" value={address} onChange={(e) => setAddress(e.target.value)} />
+            <InputField label="Phone Number" type="text" value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
             <button
               type="submit"
               className="justify-center items-center mt-12 max-w-full text-xl font-bold tracking-wide leading-6 text-center text-white uppercase whitespace-nowrap rounded-2xl w-44 h-11 max-md:px-5 max-md:mt-10 bg-sky-900 hover:bg-sky-700 transition-colors"
             >
               Register
             </button>
+            {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
             <div className="mt-4 mb-7 text-xl tracking-wide leading-7 text-black max-md:max-w-full font-round">
               Already have an account? <a href="/login" className="text-sky-900">Login</a>
             </div>

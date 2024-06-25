@@ -1,6 +1,10 @@
 package models
 
-import "gorm.io/gorm"
+import (
+	"regexp"
+
+	"gorm.io/gorm"
+)
 
 type User struct {
 	gorm.Model
@@ -17,4 +21,9 @@ type User struct {
 type Seller struct {
 	Username string
 	Password string
+}
+
+func IsValidEmail(email string) bool {
+	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$`)
+	return emailRegex.MatchString(email)
 }

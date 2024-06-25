@@ -1,6 +1,7 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useUserAuth } from '../contexts/user-context';
+import { useUser } from '../contexts/user-context';
+import Modal from '../components/modal'
 
 type ContentLayout = {
   children: React.ReactElement;
@@ -8,18 +9,39 @@ type ContentLayout = {
 
 export default function Protected({ children }: ContentLayout) {
   const navigate = useNavigate();
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
 
   // Passing User Auth From (UserContext.tsx)
-  const { isAuth } = useUserAuth();
+  const { user } = useUser();
 
   useEffect(() => {
-    if (!isAuth()) {
-      // If not auth then go to '/' (login page at routes)
-      navigate('/');
+    if (!user) {
+      setModalMessage("Please log in to access this page.");
+      setShowModal(true);
     }
 
     // --------------------------------
   }, []);
 
-  return children;
+  return (
+    <>
+      {showModal && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-content">{modalMessage}</div>
+            <div className="modal-buttons">
+              <button
+                className="modal-button"
+                onClick={() => navigate('/login')}
+              >
+                Login
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {children}
+    </>
+  );
 }
