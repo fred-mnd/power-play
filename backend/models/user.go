@@ -15,7 +15,7 @@ type User struct {
 	Address     string
 	CartProducts []Product `gorm:"many2many:carts"`
 	Transactions []Transaction
-	Money       int
+	Money       uint
 }
 
 type Seller struct {

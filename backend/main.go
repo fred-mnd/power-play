@@ -25,7 +25,8 @@ func main() {
 	user := r.Group("/users")
 	{
 		user.GET("/:id", controller.GetUser)
-		// user.POST("/update", controller.UpdateUser)
+		user.PUT("/update/:id", controller.UpdateProfileHandler)
+		user.POST("/topup/:id", controller.TopUpHandler)
 	}
 
 	prod := r.Group("/products")

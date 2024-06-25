@@ -1,12 +1,11 @@
-/* Navbar Styles */
 .navbar {
     width: 100vw;
-    background-color: #075985; /* Reverted background color */
+    background-color: #075985; 
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1rem 10%;
-    font-family: 'Arial', sans-serif; /* Consistent font across the site */
+    font-family: 'Arial', sans-serif; 
 }
 
 .navbar img {
@@ -30,9 +29,9 @@
 }
 
 .navbar-link:hover {
-    color: #054569; /* Lighter shade on hover */
-    transform: scale(1.1); /* Slightly larger on hover */
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a shadow effect to the text */
+    color: #054569;
+    transform: scale(1.1); 
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
 }
 
 .navbar-icons {
@@ -49,12 +48,11 @@
 }
 
 .navbar-icon:hover {
-    color: #054569; /* Lighter shade on hover */
-    transform: scale(1.2); /* Slightly larger on hover */
-    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add a shadow effect to the icon */
+    color: #054569; 
+    transform: scale(1.2);
+    text-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
 }
 
-/* Dropdown Styles */
 .relative {
     position: relative;
     display: inline-block;
@@ -109,11 +107,10 @@
 }
 
 .dropdown-content a:hover {
-    background-color: #e0f2fe; /* Light blue background on hover */
-    color: #053f61; /* Darker text on hover */
+    background-color: #e0f2fe;
+    color: #053f61; 
 }
 
-/* Modal Styles */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -164,7 +161,6 @@
     background-color: #053f61;
 }
 
-/* Message Style */
 .message {
     position: fixed;
     top: 60px;

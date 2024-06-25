@@ -1,58 +1,124 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useUser } from "../contexts/user-context";
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 
 const ProfilePage: React.FC = () => {
   const { user, updateUser } = useUser();
   const [activeOrders, setActiveOrders] = useState<any[]>([]);
   const [wishlist, setWishlist] = useState<any[]>([]);
+  const [showTopUpModal, setShowTopUpModal] = useState(false);
+  const [showEditProfileModal, setShowEditProfileModal] = useState(false);
+  const [topUpAmount, setTopUpAmount] = useState<string>('');
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    phoneNumber: '',
+    address: '',
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [validations, setValidations] = useState({
+    minLength: false,
+    uppercase: false,
+    lowercase: false,
+    digit: false,
+    specialChar: false
+  });
+  const [errorMessages, setErrorMessages] = useState({
+    oldPassword: '',
+    newPassword: '',
+    confirmPassword: ''
+  });
+  const [generalErrorMessage, setGeneralErrorMessage] = useState('');
   const navigate = useNavigate();
+  const topUpModalRef = useRef<HTMLDivElement>(null);
+  const editProfileModalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const fetchUserDetails = async () => {
-      try {
-        const response = await axios.get(`http://localhost:8000/users/${user.ID}`);
-        if (response.status === 200) {
-          updateUser(response.data.user);
-        } else {
-          console.error('Failed to fetch user details');
-        }
-      } catch (error) {
-        console.error('Failed to fetch user details', error);
-      }
-    };
+    if (user) {
+      setFormData({
+        name: user.Name,
+        email: user.Email,
+        phoneNumber: user.PhoneNumber,
+        address: user.Address,
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: ''
+      });
 
-    const fetchActiveOrders = async () => {
-      try {
-        const response = await axios.get(`http://localhost:8000/orders/active/${user.ID}`);
-        if (response.status === 200) {
-          setActiveOrders(response.data.orders);
-        } else {
-          console.error('Failed to fetch active orders');
+      const fetchUserDetails = async () => {
+        try {
+          const response = await axios.get(`http://localhost:8000/users/${user.ID}`);
+          if (response.status === 200) {
+            updateUser(response.data.user);
+          } else {
+            console.error('Failed to fetch user details');
+          }
+        } catch (error) {
+          console.error('Failed to fetch user details', error);
         }
-      } catch (error) {
-        console.error('Failed to fetch active orders', error);
-      }
-    };
+      };
 
-    const fetchWishlist = async () => {
-      try {
-        const response = await axios.get(`http://localhost:8000/wishlist/${user.ID}`);
-        if (response.status === 200) {
-          setWishlist(response.data.wishlist);
-        } else {
-          console.error('Failed to fetch wishlist');
+      const fetchActiveOrders = async () => {
+        try {
+          const response = await axios.get(`http://localhost:8000/orders/active/${user.ID}`);
+          if (response.status === 200) {
+            setActiveOrders(response.data.orders);
+          } else {
+            console.error('Failed to fetch active orders');
+          }
+        } catch (error) {
+          console.error('Failed to fetch active orders', error);
         }
-      } catch (error) {
-        console.error('Failed to fetch wishlist', error);
-      }
-    };
+      };
+
+      const fetchWishlist = async () => {
+        try {
+          const response = await axios.get(`http://localhost:8000/wishlist/${user.ID}`);
+          if (response.status === 200) {
+            setWishlist(response.data.wishlist);
+          } else {
+            console.error('Failed to fetch wishlist');
+          }
+        } catch (error) {
+          console.error('Failed to fetch wishlist', error);
+        }
+      };
+
+      fetchUserDetails();
+      // fetchActiveOrders();
+      // fetchWishlist();
+    }
   }, []);
 
-  if (!user) {
-    return <div className="text-center text-red-500">No user data available.</div>;
-  }
+  const handleTopUp = async () => {
+    const amount = Number(topUpAmount);
+    if (isNaN(amount) || amount <= 0) {
+      alert('Please enter a valid amount.');
+      return;
+    }
+
+    try {
+      const response = await axios.post(`http://localhost:8000/users/topup/${user.ID}`, {
+        Amount: amount,
+      }, {
+        withCredentials: true,
+      });
+
+      if (response.status === 200) {
+        updateUser(response.data.user);
+        setShowTopUpModal(false);
+        setTopUpAmount('');
+      } else {
+        console.error('Failed to top up');
+      }
+    } catch (error) {
+      console.error('Failed to top up', error);
+    }
+  };
 
   const handleLogout = async () => {
     if (!user) {
@@ -75,6 +141,148 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  const handlePasswordChange = (value: string) => {
+    setGeneralErrorMessage('');
+    setFormData((prevFormData) => ({
+        ...prevFormData,
+        newPassword: value,
+    }));
+
+    setValidations({
+        minLength: value.length >= 8,
+        uppercase: /[A-Z]/.test(value),
+        lowercase: /[a-z]/.test(value),
+        digit: /\d/.test(value),
+        specialChar: /[~!@#$%^&*()\-_=+[{\]}\\|;:'",<.>/?]/.test(value),
+    });
+
+    const errors: string[] = [];
+    if (value.length < 8) errors.push('Password must be at least 8 characters long');
+    if (!/[A-Z]/.test(value)) errors.push('Password must contain at least one uppercase letter');
+    if (!/[a-z]/.test(value)) errors.push('Password must contain at least one lowercase letter');
+    if (!/\d/.test(value)) errors.push('Password must contain at least one digit');
+    if (!/[~!@#$%^&*()\-_=+[{\]}\\|;:'",<.>/?]/.test(value)) errors.push('Password must contain at least one special character');
+
+    setErrorMessages((prev) => ({ ...prev, newPassword: errors.join(',\n') }));
+};
+
+const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData((prevFormData) => ({
+        ...prevFormData,
+        [id]: value,
+    }));
+    setErrorMessages((prev) => ({ ...prev, [id]: '' })); 
+    setGeneralErrorMessage('');
+};
+
+const handleSave = async () => {
+    setErrorMessages({
+        oldPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+    });
+
+    if (formData.oldPassword) {
+        if (formData.newPassword && formData.newPassword !== formData.confirmPassword) {
+            setErrorMessages((prev) => ({ ...prev, confirmPassword: 'New passwords do not match' }));
+            return;
+        }
+
+        if (formData.newPassword) {
+            const updatedUser: any = {
+                userId: user.ID,
+                name: formData.name,
+                email: formData.email,
+                phoneNumber: formData.phoneNumber,
+                address: formData.address,
+                oldPassword: formData.oldPassword,
+                newPassword: formData.newPassword,
+                confirmPassword: formData.confirmPassword,
+            };
+
+            try {
+                const response = await axios.put(`http://localhost:8000/users/update/${user.ID}`, updatedUser, {
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                });
+
+                const result = response.data;
+
+                if (response.status === 200) {
+                    alert("Password Updated!");
+                    updateUser(result.user);
+                    setShowEditProfileModal(false);
+                    setGeneralErrorMessage('');
+                } else {
+                    setErrorMessages((prev) => ({ ...prev, oldPassword: result.error }));
+                    setGeneralErrorMessage(result.error);
+                }
+            } catch (error: any) {
+                const errorMsg = error.response?.data?.error;
+                setGeneralErrorMessage(errorMsg);
+            }
+        } else {
+            setGeneralErrorMessage('Please enter a new password.');
+        }
+    } else {
+        const updatedUser: any = {
+            userId: user.ID,
+            name: formData.name,
+            email: formData.email,
+            phoneNumber: formData.phoneNumber,
+            address: formData.address,
+        };
+
+        try {
+            const response = await axios.put(`http://localhost:8000/users/update/${user.ID}`, updatedUser, {
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+            });
+
+            const result = response.data;
+
+            if (response.status === 200) {
+                alert("Profile Updated!");
+                updateUser(result.user);
+                setShowEditProfileModal(false);
+                setGeneralErrorMessage('');
+            } else {
+                setErrorMessages((prev) => ({ ...prev, oldPassword: result.error }));
+                setGeneralErrorMessage(result.error);
+            }
+        } catch (error: any) {
+            const errorMsg = error.response?.data?.error;
+            setErrorMessages((prev) => ({ ...prev, oldPassword: errorMsg }));
+            setGeneralErrorMessage(errorMsg);
+        }
+    }
+};
+
+  const handleOutsideClick = (e: MouseEvent) => {
+    if (showTopUpModal && topUpModalRef.current && !topUpModalRef.current.contains(e.target as Node)) {
+      setShowTopUpModal(false);
+    }
+    if (showEditProfileModal && editProfileModalRef.current && !editProfileModalRef.current.contains(e.target as Node)) {
+      setGeneralErrorMessage('');
+      setShowEditProfileModal(false);
+      setGeneralErrorMessage('');
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => {
+      document.removeEventListener('mousedown', handleOutsideClick);
+    };
+  }, [showTopUpModal, showEditProfileModal]);
+
+  if (!user) {
+    return <div className="text-center text-red-500">No user data available.</div>;
+  }
+
   return (
     <div className="profile-container">
       <h1 className="profile-title">Welcome, {user.Name}</h1>
@@ -85,8 +293,14 @@ const ProfilePage: React.FC = () => {
             <ProfileItem label="Email" value={user.Email} />
             <ProfileItem label="Phone Number" value={user.PhoneNumber} />
             <ProfileItem label="Address" value={user.Address} />
+            <div className="profile-item">
+              <h2 className="profile-item-label">Money</h2>
+              <p className="profile-item-value">
+                ${user.Money} <AccountBalanceWalletIcon onClick={() => setShowTopUpModal(true)} className="top-up-icon" />
+              </p>
+            </div>
           </div>
-          <button className="edit-button">Edit Profile</button>
+          <button className="edit-button" onClick={() => setShowEditProfileModal(true)}>Edit Profile</button>
         </div>
         <div className="profile-side">
           <div className="active-orders">
@@ -122,6 +336,125 @@ const ProfilePage: React.FC = () => {
           <button className="logout-button" onClick={handleLogout}>Logout</button>
         </div>
       </div>
+
+      {showTopUpModal && (
+        <div className="modal-overlay">
+          <div className="modal" ref={topUpModalRef}>
+            <div className="modal-content">
+              <h2 className="modal-title">Top Up</h2>
+              <input
+                type="number"
+                value={topUpAmount}
+                onChange={(e) => setTopUpAmount(e.target.value)}
+                className="top-up-input"
+                placeholder="Enter amount"
+              />
+              <button className="modal-button" onClick={handleTopUp}>Top Up</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showEditProfileModal && (
+        <div className="modal-overlay">
+          <div className="modal" ref={editProfileModalRef}>
+            <div className="modal-content">
+              <h2 className="modal-title">Edit Profile</h2>
+              <div className="form-container">
+                <div className="form-left">
+                  <div className="form-group">
+                    <label htmlFor="name" className="input-label">Name</label>
+                    <input
+                      type="text"
+                      id="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
+                      placeholder="Name"
+                      className="top-up-input"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="email" className="input-label">Email</label>
+                    <input
+                      type="email"
+                      id="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
+                      placeholder="Email"
+                      className="top-up-input"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="phoneNumber" className="input-label">Phone Number</label>
+                    <input
+                      type="text"
+                      id="phoneNumber"
+                      value={formData.phoneNumber}
+                      onChange={handleInputChange}
+                      placeholder="Phone Number"
+                      className="top-up-input"
+                    />
+                  </div>
+                </div>
+                <div className="form-right">
+                  <div className="form-group">
+                    <label htmlFor="address" className="input-label">Address</label>
+                    <input
+                      type="text"
+                      id="address"
+                      value={formData.address}
+                      onChange={handleInputChange}
+                      placeholder="Address"
+                      className="top-up-input"
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label htmlFor="oldPassword" className="input-label">Old Password</label>
+                    <input
+                      type="password"
+                      id="oldPassword"
+                      value={formData.oldPassword}
+                      onChange={handleInputChange}
+                      placeholder="Old Password"
+                      className="top-up-input"
+                    />
+                  </div>
+                  {formData.oldPassword && (
+                    <>
+                      <div className="form-group">
+                        <label htmlFor="newPassword" className="input-label">New Password</label>
+                        <input
+                          type="password"
+                          id="newPassword"
+                          value={formData.newPassword}
+                          onChange={(e) => handlePasswordChange(e.target.value)}
+                          placeholder="New Password"
+                          className="top-up-input"
+                        />
+                        {errorMessages.newPassword && <p className="error-text">{errorMessages.newPassword}</p>}
+                      </div>
+                      <div className="form-group">
+                        <label htmlFor="confirmPassword" className="input-label">Confirm Password</label>
+                        <input
+                          type="password"
+                          id="confirmPassword"
+                          value={formData.confirmPassword}
+                          onChange={handleInputChange}
+                          placeholder="Confirm Password"
+                          className="top-up-input"
+                        />
+                        {errorMessages.confirmPassword && <p className="error-text">{errorMessages.confirmPassword}</p>}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+              {generalErrorMessage && <p className="general-error-text">{generalErrorMessage}</p>}
+              <button className="modal-button" onClick={handleSave}>Update Profile</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
@@ -186,7 +519,7 @@ const styles = `
   }
 
   .profile-info, .profile-side {
-    flex: 1 1 300px; /* Make each section take at least 300px and grow as needed */
+    flex: 1 1 300px; 
     padding: 20px;
   }
 
@@ -218,6 +551,13 @@ const styles = `
   .profile-item-value {
     color: #333;
     font-size: 18px;
+  }
+
+  .top-up-icon {
+    cursor: pointer;
+    margin-left: 10px;
+    color: #054569;
+    font-size: 24px;
   }
 
   .edit-button, .logout-button {
@@ -278,36 +618,106 @@ const styles = `
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
 
-  @media (max-width: 768px) {
-    .profile-main {
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .profile-title {
-      font-size: 28px;
-    }
-
-    .profile-item-label {
-      font-size: 18px;
-    }
-
-    .profile-item-value {
-      font-size: 16px;
-    }
-
-    .edit-button, .logout-button {
-      font-size: 14px;
-    }
-
-    .section-title {
-      font-size: 20px;
-    }
-
-    .see-all-button {
-      font-size: 12px;
-    }
+  .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
   }
+
+  .modal {
+    background: white;
+    padding: 20px;
+    border-radius: 18px;
+    text-align: center;
+    width: 70%;
+    max-width: 600px;
+    font-family: 'Arial', sans-serif;
+  }
+
+  .modal-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 15px;
+    font-size: 18px;
+  }
+
+  .form-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .form-left, .form-right {
+    width: 48%;
+  }
+
+  .modal-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #075985;
+    margin-bottom: 20px;
+  }
+
+  .modal-button {
+    background-color: #075985;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 11px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease;
+  }
+
+  .modal-button:hover {
+    background-color: #053f61;
+  }
+
+  .top-up-input {
+    margin-bottom: 15px;
+    width: 100%;
+    padding: 10px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: #f0f4f8;
+  }
+
+  .input-label {
+    text-align: left;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 4px;
+  }
+
+  .form-group {
+    text-align: left;
+  }
+
+  .error-text {
+    color: red;
+    font-size: 14px;
+    text-align: left;
+    width: 100%;
+    margin-top: -10px;
+  }
+
+  .general-error-text {
+    color: red;
+    font-size: 14px;
+    text-align: center;
+    width: 100%;
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+
 
   @keyframes fadeIn {
     from {

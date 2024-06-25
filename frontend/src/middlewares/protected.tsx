@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../contexts/user-context';
-import Modal from '../components/modal'
 
 type ContentLayout = {
   children: React.ReactElement;
@@ -11,8 +10,6 @@ export default function Protected({ children }: ContentLayout) {
   const navigate = useNavigate();
   const [showModal, setShowModal] = useState(false);
   const [modalMessage, setModalMessage] = useState("");
-
-  // Passing User Auth From (UserContext.tsx)
   const { user } = useUser();
 
   useEffect(() => {
@@ -21,7 +18,6 @@ export default function Protected({ children }: ContentLayout) {
       setShowModal(true);
     }
 
-    // --------------------------------
   }, []);
 
   return (
