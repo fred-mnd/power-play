@@ -2,7 +2,7 @@ import React from 'react';
 
 interface CountOrderProps {
   order: number;
-  setOrder: React.Dispatch<React.SetStateAction<number>>;
+  setOrder: (newQuantity: number) => void;
 }
 
 export const CountOrder: React.FC<CountOrderProps> = ({ order, setOrder }) => {

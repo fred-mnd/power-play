@@ -45,6 +45,8 @@ func main() {
 	{
 		carts.POST("/add-to-cart", controller.AddToCart)
 		carts.GET("/get-cart/:id", controller.GetCart)
+		carts.PUT("/update/:user_id/:product_id", controller.UpdateCartItem)
+		carts.DELETE("/delete/:user_id/:product_id", controller.DeleteFromCart)
 	}
 
 	orders := r.Group("/orders")

@@ -8,9 +8,12 @@ export interface IProducts{
 
 export interface IProductCart extends IProducts{
     Quantity: number
+    TotalPrice: number
 }
 
 export interface ICart{
     TotalPrice: number
     Products: IProductCart[]
+    ShippingFee: number
+    FinalPrice: number
 }

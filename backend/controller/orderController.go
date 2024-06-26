@@ -56,12 +56,46 @@ func GetOrder(c *gin.Context){
 
 	userID := c.Param("id")
 
+	type CartProduct struct{
+		models.Product
+		Quantity int
+		TotalPrice int
+	}
+
+	type Cart struct{
+		TotalPrice int
+		ShippingFee int
+		FinalPrice int
+		Products []CartProduct
+	}
+
+	carts := Cart{
+		TotalPrice: 0,
+		ShippingFee: 11, 
+	}
+
+	db.Table("products").Select("products.*, quantity").
+	Joins("join carts on carts.product_id = products.id").
+	Where("carts.user_id = ?", userID).
+	Scan(&carts.Products)
+
+	for i, prod := range carts.Products {
+		totalPrice := prod.Price * prod.Quantity
+		carts.Products[i].TotalPrice = totalPrice
+		carts.TotalPrice += totalPrice
+	}
+
+	carts.FinalPrice = carts.TotalPrice + carts.ShippingFee
+
 	var tran []models.Transaction
 
 	type Order struct{
 		models.Product
 		Quantity int
+		Status string
+		TransactionDate time.Time
 	}
+
 
 	var orders []Order
 
@@ -75,9 +109,16 @@ func GetOrder(c *gin.Context){
 			orders = append(orders, Order{
 				Product: p,
 				Quantity: Quantity,
+				Status: t.Status,
+				TransactionDate: t.TransactionDate,
 			})
 		}
 	}
+
+	var user models.User
+	db.First(&user, userID)
+	user.Money -= uint(carts.FinalPrice)
+	db.Save(&user)
 
 	c.JSON(http.StatusOK, orders)
 }

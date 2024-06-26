@@ -3,11 +3,13 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { useUser } from "../contexts/user-context";
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import Checkbox from '@mui/material/Checkbox';
+import FormControlLabel from '@mui/material/FormControlLabel';
+import FormGroup from '@mui/material/FormGroup';
 
 const ProfilePage: React.FC = () => {
   const { user, updateUser } = useUser();
   const [activeOrders, setActiveOrders] = useState<any[]>([]);
-  const [wishlist, setWishlist] = useState<any[]>([]);
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState<string>('');
@@ -64,9 +66,9 @@ const ProfilePage: React.FC = () => {
 
       const fetchActiveOrders = async () => {
         try {
-          const response = await axios.get(`http://localhost:8000/orders/active/${user.ID}`);
+          const response = await axios.get(`http://localhost:8000/orders/get-order/${user.ID}`);
           if (response.status === 200) {
-            setActiveOrders(response.data.orders);
+            setActiveOrders(response.data);
           } else {
             console.error('Failed to fetch active orders');
           }
@@ -75,22 +77,8 @@ const ProfilePage: React.FC = () => {
         }
       };
 
-      const fetchWishlist = async () => {
-        try {
-          const response = await axios.get(`http://localhost:8000/wishlist/${user.ID}`);
-          if (response.status === 200) {
-            setWishlist(response.data.wishlist);
-          } else {
-            console.error('Failed to fetch wishlist');
-          }
-        } catch (error) {
-          console.error('Failed to fetch wishlist', error);
-        }
-      };
-
       fetchUserDetails();
-      // fetchActiveOrders();
-      // fetchWishlist();
+      fetchActiveOrders();
     }
   }, []);
 
@@ -155,15 +143,6 @@ const ProfilePage: React.FC = () => {
         digit: /\d/.test(value),
         specialChar: /[~!@#$%^&*()\-_=+[{\]}\\|;:'",<.>/?]/.test(value),
     });
-
-    const errors: string[] = [];
-    if (value.length < 8) errors.push('Password must be at least 8 characters long');
-    if (!/[A-Z]/.test(value)) errors.push('Password must contain at least one uppercase letter');
-    if (!/[a-z]/.test(value)) errors.push('Password must contain at least one lowercase letter');
-    if (!/\d/.test(value)) errors.push('Password must contain at least one digit');
-    if (!/[~!@#$%^&*()\-_=+[{\]}\\|;:'",<.>/?]/.test(value)) errors.push('Password must contain at least one special character');
-
-    setErrorMessages((prev) => ({ ...prev, newPassword: errors.join(',\n') }));
 };
 
 const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -272,6 +251,11 @@ const handleSave = async () => {
     }
   };
 
+  const formatDate = (datetime: string) => {
+    const date = new Date(datetime);
+    return date.toLocaleDateString(); // This will return the date in the local format (e.g., MM/DD/YYYY for en-US)
+  };
+
   useEffect(() => {
     document.addEventListener('mousedown', handleOutsideClick);
     return () => {
@@ -284,178 +268,231 @@ const handleSave = async () => {
   }
 
   return (
-    <div className="profile-container">
-      <h1 className="profile-title">Welcome, {user.Name}</h1>
-      <div className="profile-main">
-        <div className="profile-info">
-          <div className="profile-content">
-            <ProfileItem label="Name" value={user.Name} />
-            <ProfileItem label="Email" value={user.Email} />
-            <ProfileItem label="Phone Number" value={user.PhoneNumber} />
-            <ProfileItem label="Address" value={user.Address} />
-            <div className="profile-item">
-              <h2 className="profile-item-label">Money</h2>
-              <p className="profile-item-value">
-                ${user.Money} <AccountBalanceWalletIcon onClick={() => setShowTopUpModal(true)} className="top-up-icon" />
-              </p>
-            </div>
-          </div>
-          <button className="edit-button" onClick={() => setShowEditProfileModal(true)}>Edit Profile</button>
-        </div>
-        <div className="profile-side">
-          <div className="active-orders">
-            <div className="orders-header">
-              <h2 className="section-title">Active Orders</h2>
-              <button className="see-all-button" onClick={() => navigate('/orders')}>See All</button>
-            </div>
-            {activeOrders.length > 0 ? (
-              activeOrders.map((order, index) => (
-                <div key={index} className="order-item">
-                  <p>{order.itemName}</p>
-                  <p>{order.date}</p>
-                  <p>{order.status}</p>
-                </div>
-              ))
-            ) : (
-              <p>No active orders found</p>
-            )}
-          </div>
-          <div className="wishlist">
-            <h2 className="section-title">Wishlist</h2>
-            {wishlist.length > 0 ? (
-              wishlist.map((item, index) => (
-                <div key={index} className="wishlist-item">
-                  <p>{item.itemName}</p>
-                  <p>{item.price}</p>
-                </div>
-              ))
-            ) : (
-              <p>No items in wishlist</p>
-            )}
-          </div>
-          <button className="logout-button" onClick={handleLogout}>Logout</button>
-        </div>
-      </div>
-
-      {showTopUpModal && (
-        <div className="modal-overlay">
-          <div className="modal" ref={topUpModalRef}>
-            <div className="modal-content">
-              <h2 className="modal-title">Top Up</h2>
-              <input
-                type="number"
-                value={topUpAmount}
-                onChange={(e) => setTopUpAmount(e.target.value)}
-                className="top-up-input"
-                placeholder="Enter amount"
-              />
-              <button className="modal-button" onClick={handleTopUp}>Top Up</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showEditProfileModal && (
-        <div className="modal-overlay">
-          <div className="modal" ref={editProfileModalRef}>
-            <div className="modal-content">
-              <h2 className="modal-title">Edit Profile</h2>
-              <div className="form-container">
-                <div className="form-left">
-                  <div className="form-group">
-                    <label htmlFor="name" className="input-label">Name</label>
-                    <input
-                      type="text"
-                      id="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      placeholder="Name"
-                      className="top-up-input"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="email" className="input-label">Email</label>
-                    <input
-                      type="email"
-                      id="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                      placeholder="Email"
-                      className="top-up-input"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="phoneNumber" className="input-label">Phone Number</label>
-                    <input
-                      type="text"
-                      id="phoneNumber"
-                      value={formData.phoneNumber}
-                      onChange={handleInputChange}
-                      placeholder="Phone Number"
-                      className="top-up-input"
-                    />
-                  </div>
-                </div>
-                <div className="form-right">
-                  <div className="form-group">
-                    <label htmlFor="address" className="input-label">Address</label>
-                    <input
-                      type="text"
-                      id="address"
-                      value={formData.address}
-                      onChange={handleInputChange}
-                      placeholder="Address"
-                      className="top-up-input"
-                    />
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="oldPassword" className="input-label">Old Password</label>
-                    <input
-                      type="password"
-                      id="oldPassword"
-                      value={formData.oldPassword}
-                      onChange={handleInputChange}
-                      placeholder="Old Password"
-                      className="top-up-input"
-                    />
-                  </div>
-                  {formData.oldPassword && (
-                    <>
-                      <div className="form-group">
-                        <label htmlFor="newPassword" className="input-label">New Password</label>
-                        <input
-                          type="password"
-                          id="newPassword"
-                          value={formData.newPassword}
-                          onChange={(e) => handlePasswordChange(e.target.value)}
-                          placeholder="New Password"
-                          className="top-up-input"
-                        />
-                        {errorMessages.newPassword && <p className="error-text">{errorMessages.newPassword}</p>}
-                      </div>
-                      <div className="form-group">
-                        <label htmlFor="confirmPassword" className="input-label">Confirm Password</label>
-                        <input
-                          type="password"
-                          id="confirmPassword"
-                          value={formData.confirmPassword}
-                          onChange={handleInputChange}
-                          placeholder="Confirm Password"
-                          className="top-up-input"
-                        />
-                        {errorMessages.confirmPassword && <p className="error-text">{errorMessages.confirmPassword}</p>}
-                      </div>
-                    </>
-                  )}
-                </div>
+    <div className="w-dvw">
+      <div className="profile-container">
+        <h1 className="profile-title">Welcome, {user.Name}</h1>
+        <div className="profile-main">
+          <div className="profile-info">
+          <h2 className="section-title">Profile</h2>
+            <div className="profile-content">
+              <ProfileItem label="Name" value={user.Name} />
+              <ProfileItem label="Email" value={user.Email} />
+              <ProfileItem label="Phone Number" value={user.PhoneNumber} />
+              <ProfileItem label="Address" value={user.Address} />
+              <div className="profile-item">
+                <h2 className="profile-item-label">Money</h2>
+                <p className="profile-item-value">
+                  ${user.Money} <AccountBalanceWalletIcon onClick={() => setShowTopUpModal(true)} className="top-up-icon" />
+                </p>
               </div>
-              {generalErrorMessage && <p className="general-error-text">{generalErrorMessage}</p>}
-              <button className="modal-button" onClick={handleSave}>Update Profile</button>
+            </div>
+            <button className="edit-button" onClick={() => setShowEditProfileModal(true)}>Edit Profile</button>
+          </div>
+          <div className="profile-side">
+            <div className="active-orders">
+              <div className="orders-header">
+                <h2 className="section-title">Active Orders</h2>
+                <button className="see-all-button" onClick={() => navigate('/orders')}>See All</button>
+              </div>
+              <div className="flex flex-col gap-3">
+                {activeOrders.length > 0 ? (
+                  activeOrders.slice(0, 3).map((order, index) => (
+                    <div key={index} className="order-item flex w-full justify-between mb-2 p-4 rounded-xl shadow-md">
+                      <div className="flex flex-1 items-center">
+                        <img src={order.ImgUrl} alt={order.Name} className="w-20 h-20 object-contain mr-4 rounded-lg" />
+                        <div className="flex-1 flex flex-col justify-center">
+                          <p className="font-bold font-round text-sky-900">{order.Name}</p>
+                          <p className="font-semibold font-round text-sm">Quantity: {order.Quantity}</p>
+                          <div className="flex items-center gap-1 font-semibold font-round text-sm">
+                            <p>Status:</p>
+                            <p className="text-sky-900">{order.Status}</p>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-start justify-center">
+                        <p className="font-semibold font-round text-sm">{formatDate(order.TransactionDate)}</p>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p>No active orders found</p>
+                )}
+              </div>
+              
             </div>
           </div>
         </div>
-      )}
+
+        {showTopUpModal && (
+          <div className="modal-overlay">
+            <div className="modal" ref={topUpModalRef}>
+              <div className="modal-content">
+                <h2 className="modal-title">Top Up</h2>
+                <input
+                  type="number"
+                  value={topUpAmount}
+                  onChange={(e) => setTopUpAmount(e.target.value)}
+                  className="top-up-input"
+                  placeholder="Enter amount"
+                />
+                <button className="modal-button" onClick={handleTopUp}>Top Up</button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {showEditProfileModal && (
+          <div className="modal-overlay">
+            <div className="modal" ref={editProfileModalRef}>
+              <div className="modal-content">
+                <h2 className="modal-title">Edit Profile</h2>
+                <div className="form-container">
+                  <div className="form-left">
+                    <div className="form-group">
+                      <label htmlFor="name" className="input-label">Name</label>
+                      <input
+                        type="text"
+                        id="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        placeholder="Name"
+                        className="top-up-input"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="email" className="input-label">Email</label>
+                      <input
+                        type="email"
+                        id="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
+                        placeholder="Email"
+                        className="top-up-input"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="phoneNumber" className="input-label">Phone Number</label>
+                      <input
+                        type="text"
+                        id="phoneNumber"
+                        value={formData.phoneNumber}
+                        onChange={handleInputChange}
+                        placeholder="Phone Number"
+                        className="top-up-input"
+                      />
+                    </div>
+                  </div>
+                  <div className="form-right">
+                    <div className="form-group">
+                      <label htmlFor="address" className="input-label">Address</label>
+                      <input
+                        type="text"
+                        id="address"
+                        value={formData.address}
+                        onChange={handleInputChange}
+                        placeholder="Address"
+                        className="top-up-input"
+                      />
+                    </div>
+                    <div className="form-group">
+                      <label htmlFor="oldPassword" className="input-label">Old Password</label>
+                      <input
+                        type="password"
+                        id="oldPassword"
+                        value={formData.oldPassword}
+                        onChange={handleInputChange}
+                        placeholder="Old Password"
+                        className="top-up-input"
+                      />
+                    </div>
+                    {formData.oldPassword && (
+                      <>
+                        <div className="form-group">
+                          <label htmlFor="newPassword" className="input-label">New Password</label>
+                          <input
+                            type="password"
+                            id="newPassword"
+                            value={formData.newPassword}
+                            onChange={(e) => handlePasswordChange(e.target.value)}
+                            placeholder="New Password"
+                            className="top-up-input"
+                          />
+                        </div>
+                        <div className="form-group">
+                          <label htmlFor="confirmPassword" className="input-label">Confirm Password</label>
+                          <input
+                            type="password"
+                            id="confirmPassword"
+                            value={formData.confirmPassword}
+                            onChange={handleInputChange}
+                            placeholder="Confirm Password"
+                            className="top-up-input"
+                          />
+                        </div>
+                        <div className="form-group">
+                          <p>Password Requirements:</p>
+                          <FormGroup>
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={validations.minLength}
+                                  disabled
+                                  sx={{
+                                    color: validations.minLength ? '#054569' : '',
+                                    '&.Mui-checked': {
+                                      color: '#054569',
+                                    },
+                                  }}
+                                />
+                              }
+                              label="Minimum 8 characters"
+                            />
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={validations.uppercase && validations.lowercase}
+                                  disabled
+                                  sx={{
+                                    color: validations.uppercase && validations.lowercase ? '#054569' : '',
+                                    '&.Mui-checked': {
+                                      color: '#054569',
+                                    },
+                                  }}
+                                />
+                              }
+                              label="At least one uppercase and lowercase letter"
+                            />
+                            <FormControlLabel
+                              control={
+                                <Checkbox
+                                  checked={validations.digit && validations.specialChar}
+                                  disabled
+                                  sx={{
+                                    color: validations.digit && validations.specialChar ? '#054569' : '',
+                                    '&.Mui-checked': {
+                                      color: '#054569',
+                                    },
+                                  }}
+                                />
+                              }
+                              label="At least one number and special character"
+                            />
+                          </FormGroup>
+
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+                {generalErrorMessage && <p className="general-error-text">{generalErrorMessage}</p>}
+                <button className="modal-button" onClick={handleSave}>Update Profile</button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
+    
   );
 };
 
@@ -482,6 +519,7 @@ const styles = `
     border-radius: 16px;
     padding: 30px;
     max-width: 1200px;
+    width: 100vw;
     margin: 50px auto;
     font-family: 'Poppins', sans-serif;
     animation: fadeIn 1s ease-in-out;
@@ -525,7 +563,7 @@ const styles = `
 
   .profile-content {
     text-align: left;
-    margin-top: 20px;
+    margin-top: 10px;
   }
 
   .profile-item {
@@ -535,6 +573,10 @@ const styles = `
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
+    height: 102px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .profile-item:hover {
@@ -735,3 +777,4 @@ const styleSheet = document.createElement("style");
 styleSheet.type = "text/css";
 styleSheet.innerText = styles;
 document.head.appendChild(styleSheet);
+
