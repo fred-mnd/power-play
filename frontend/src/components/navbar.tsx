@@ -66,6 +66,7 @@ export default function Navbar() {
               {user ? (
                 <>
                   <Link className="block px-4 py-2 text-sky-900 hover:bg-sky-100" to="/profile">Profile</Link>
+                  <Link className="block px-4 py-2 text-sky-900 hover:bg-sky-100" to="/orders">Orders</Link>
                   <Link className="block px-4 py-2 text-sky-900 hover:bg-sky-100" to="/" onClick={handleLogout}>Logout</Link>
                 </>
               ) : (

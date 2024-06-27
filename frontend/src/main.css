@@ -1,14 +1,6 @@
-/* Initial CSS */
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-*{
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
 
 @keyframes fadeIn {
   from {
@@ -51,4 +43,8 @@
 
 .animate-slideInRight {
   animation: slideInRight 1s ease-in-out;
+}
+
+.text-shadow-custom {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }

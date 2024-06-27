@@ -50,6 +50,13 @@ func AddOrder(c *gin.Context){
 
 	db.Find(&user, userID)
 
+	if user.Money < uint(carts.FinalPrice) {
+		c.JSON(http.StatusBadRequest, gin.H{
+			"error": "Insufficient funds! Please top up first.",
+		})
+		return
+	}
+
 	type Cart struct{
 		ProductID uint
 		Quantity int

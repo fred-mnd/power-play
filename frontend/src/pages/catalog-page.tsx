@@ -25,7 +25,7 @@ const FilterDetails: React.FC<FilterNameProps> = ({ name, handleFilterChange }) 
         <div className="flex flex-row w-full gap-3">
           <input
             type="checkbox"
-            className="accent-sky-600"
+            className="accent-[#0D4274]"
             onChange={(e) => handleFilterChange(name.ID, e.target.checked ? "true" : "false")}
           />
           <p className="font-round">{name.Name}</p>
@@ -34,7 +34,7 @@ const FilterDetails: React.FC<FilterNameProps> = ({ name, handleFilterChange }) 
         <div className="flex justify-between items-center gap-5">
           <p className="font-round w-1/4">{name.Name}</p>
           <select
-            className="border-sky-900 border rounded-md"
+            className="border-[#0D4274] border rounded-md"
             onChange={(e) => handleFilterChange(name.ID, e.target.value)}
           >
             {name.Options.map((option) => (
@@ -52,7 +52,7 @@ const FilterDetails: React.FC<FilterNameProps> = ({ name, handleFilterChange }) 
 const FilterCategory: React.FC<FilterCategoryProps> = ({ filter, handleFilterChange }) => {
   return (
     <div className="bg-white rounded-lg p-4 flex flex-col gap-2 shadow-md">
-      <p className="font-round text-sky-900 text-xl">{filter.Category}</p>
+      <p className="font-round text-[#0D4274] text-xl">{filter.Category}</p>
       <hr className="border-gray-300 border-1" />
       {filter.Filters.map((name) => (
         <FilterDetails key={name.Name} name={name} handleFilterChange={handleFilterChange} />
@@ -63,17 +63,17 @@ const FilterCategory: React.FC<FilterCategoryProps> = ({ filter, handleFilterCha
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
-    <div className="bg-sky-50 rounded-3xl overflow-hidden shadow-lg p-3 transition-transform transform hover:scale-105" style={{ width: '100%', height: '80%' }}>
+    <div className="relative bg-sky-50 rounded-3xl overflow-hidden shadow-lg p-3 mb-2 transition-transform transform hover:scale-105 relative w-full h-[80%] flex flex-col justify-between">
       <div className="flex items-center justify-center h-48">
-        <img src={product.ImgUrl} alt={product.Name} className="object-cover w-full"/>
+        <img src={product.ImgUrl} alt={product.Name} className="object-cover w-[90%] mt-4"/>
       </div>
-      <div className="px-6 py-3">
-        <div className="font-bold text-xl mb-2">{product.Name}</div>
+      <div className="px-6 py-3 flex-grow">
+        <div className="font-bold text-xl mt-5 mb-2">{product.Name}</div>
         <p className="text-gray-900 text-lg font-semibold">${product.Price}</p>
       </div>
-      <div className="absolute bottom-7 left-0 right-0 flex justify-center">
+      <div className="flex justify-center mb-7">
         <Link to={`/details/${product.ID}`} className="flex justify-center items-center">
-          <button className="bg-sky-800 hover:bg-sky-900 text-white font-bold py-2 px-8 rounded-full">
+          <button className="bg-[#0D4274] hover:bg-[#0a345a] text-white font-bold py-2 px-8 rounded-full">
             VIEW
           </button>
         </Link>
@@ -124,21 +124,21 @@ const Catalog: React.FC = () => {
   };
 
   return (
-    <div className="px-[10%] w-dvw mt-7 flex flex-row justify-between gap-14">
+    <div className="px-[10%] w-dvw mt-28 flex flex-col md:flex-row justify-between gap-14">
       {/* Filters Section */}
-      <div className="bg-sky-200 w-1/4 h-full px-5 py-3 rounded-lg flex flex-col gap-5 shadow-lg">
+      <div className="bg-sky-200 w-full md:w-1/4 h-full px-5 py-3 rounded-lg flex flex-col gap-5 shadow-lg mb-6 md:mb-0">
         {filters.map((filter) => (
           <FilterCategory key={filter.Category} filter={filter} handleFilterChange={handleFilterChange} />
         ))}
         <div className="pt-4 pb-2 flex gap-5">
           <button
-            className="bg-white hover:bg-sky-50 text-sky-900 font-bold py-2 px-5 rounded"
+            className="bg-white hover:bg-sky-50 text-[#0D4274] font-bold py-2 px-5 rounded"
             onClick={fetchProducts}
           >
             APPLY
           </button>
           <button
-            className="bg-white hover:bg-sky-50 text-sky-900 font-bold py-2 px-5 rounded"
+            className="bg-white hover:bg-sky-50 text-[#0D4274] font-bold py-2 px-5 rounded"
             onClick={clearFilters}
           >
             CLEAR
@@ -147,7 +147,7 @@ const Catalog: React.FC = () => {
       </div>
 
       {/* Products Section */}
-      <div className="w-full grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="w-[100%] grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {products.map((product) => (
           <ProductCard key={product.ID} product={product} />
         ))}

@@ -9,7 +9,7 @@ import FormGroup from '@mui/material/FormGroup';
 
 const ProfilePage: React.FC = () => {
   const { user, updateUser } = useUser();
-  const [activeOrders, setActiveOrders] = useState<any[]>([]);
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
   const [showTopUpModal, setShowTopUpModal] = useState(false);
   const [showEditProfileModal, setShowEditProfileModal] = useState(false);
   const [topUpAmount, setTopUpAmount] = useState<string>('');
@@ -64,21 +64,21 @@ const ProfilePage: React.FC = () => {
         }
       };
 
-      const fetchActiveOrders = async () => {
+      const fetchRecentOrders = async () => {
         try {
           const response = await axios.get(`http://localhost:8000/orders/get-order/${user.ID}`);
           if (response.status === 200) {
-            setActiveOrders(response.data);
+            setRecentOrders(response.data);
           } else {
-            console.error('Failed to fetch active orders');
+            console.error('Failed to fetch recent orders');
           }
         } catch (error) {
-          console.error('Failed to fetch active orders', error);
+          console.error('Failed to fetch recent orders', error);
         }
       };
 
       fetchUserDetails();
-      fetchActiveOrders();
+      fetchRecentOrders();
     }
   }, []);
 
@@ -253,7 +253,7 @@ const handleSave = async () => {
 
   const formatDate = (datetime: string) => {
     const date = new Date(datetime);
-    return date.toLocaleDateString(); // This will return the date in the local format (e.g., MM/DD/YYYY for en-US)
+    return date.toLocaleDateString(); 
   };
 
   useEffect(() => {
@@ -273,7 +273,10 @@ const handleSave = async () => {
         <h1 className="profile-title">Welcome, {user.Name}</h1>
         <div className="profile-main">
           <div className="profile-info">
-          <h2 className="section-title">Profile</h2>
+          <div className="profile-header">
+                <h2 className="section-title">Profile</h2>
+                <button className="edit-button" onClick={() => setShowEditProfileModal(true)}>Edit Profile</button>
+              </div>
             <div className="profile-content">
               <ProfileItem label="Name" value={user.Name} />
               <ProfileItem label="Email" value={user.Email} />
@@ -286,39 +289,38 @@ const handleSave = async () => {
                 </p>
               </div>
             </div>
-            <button className="edit-button" onClick={() => setShowEditProfileModal(true)}>Edit Profile</button>
+            
           </div>
           <div className="profile-side">
-            <div className="active-orders">
+            <div className="recent-orders">
               <div className="orders-header">
-                <h2 className="section-title">Active Orders</h2>
+                <h2 className="section-title">Recent Orders</h2>
                 <button className="see-all-button" onClick={() => navigate('/orders')}>See All</button>
               </div>
-              <div className="flex flex-col gap-3">
-                {activeOrders ? (
-                  activeOrders.slice(0, 3).map((order, index) => (
-                    <div key={index} className="order-item flex w-full justify-between mb-2 p-4 rounded-xl shadow-md">
+              <div className="flex flex-col">
+                {recentOrders ? (
+                  recentOrders.slice(0, 5).map((order, index) => (
+                    <div key={index} className="order-item flex w-full justify-between p-4 rounded-xl shadow-md">
                       <div className="flex flex-1 items-center">
                         <img src={order.ImgUrl} alt={order.Name} className="w-20 h-20 object-contain mr-4 rounded-lg" />
                         <div className="flex-1 flex flex-col justify-center">
-                          <p className="font-bold font-round text-sky-900">{order.Name}</p>
+                          <p className="font-bold font-round text-[#0D4274]">{order.Name}</p>
                           <p className="font-semibold font-round text-sm">Quantity: {order.Quantity}</p>
                           <div className="flex items-center gap-1 font-semibold font-round text-sm">
                             <p>Status:</p>
-                            <p className="text-sky-900">{order.Status}</p>
+                            <p className="text-[#0D4274]">{order.Status}</p>
                           </div>
                         </div>
                       </div>
-                      <div className="flex items-start justify-center">
+                      <div className="flex items-start justify-center mt-1 mr-1">
                         <p className="font-semibold font-round text-sm">{formatDate(order.TransactionDate)}</p>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p>No active orders found</p>
+                  <p>No orders found</p>
                 )}
-              </div>
-              
+              </div> 
             </div>
           </div>
         </div>
@@ -521,12 +523,13 @@ const styles = `
     max-width: 1200px;
     width: 100vw;
     margin: 50px auto;
+    margin-top: 100px;
     font-family: 'Poppins', sans-serif;
     animation: fadeIn 1s ease-in-out;
   }
 
   .profile-title {
-    color: #075985;
+    color: #0D4274;
     font-size: 36px;
     font-weight: 700;
     margin-bottom: 20px;
@@ -541,7 +544,7 @@ const styles = `
     content: '';
     width: 50px;
     height: 5px;
-    background-color: #ff7f50;
+    background-color: #86B9E8;
     position: absolute;
     bottom: 0;
     left: 50%;
@@ -556,6 +559,12 @@ const styles = `
     flex-wrap: wrap;
   }
 
+  .profile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
   .profile-info, .profile-side {
     flex: 1 1 300px; 
     padding: 20px;
@@ -563,7 +572,6 @@ const styles = `
 
   .profile-content {
     text-align: left;
-    margin-top: 10px;
   }
 
   .profile-item {
@@ -573,7 +581,7 @@ const styles = `
     border-radius: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease;
-    height: 102px;
+    height: 112px;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -588,11 +596,13 @@ const styles = `
     font-size: 20px;
     font-weight: 600;
     margin-bottom: 5px;
+    margin-left: 5px;
   }
 
   .profile-item-value {
     color: #333;
     font-size: 18px;
+    margin-left: 5px;
   }
 
   .top-up-icon {
@@ -602,21 +612,20 @@ const styles = `
     font-size: 24px;
   }
 
-  .edit-button, .logout-button {
-    background-color: #ff7f50;
+  .edit-button {
+    background-color: #0D4274;
     color: white;
-    padding: 10px 20px;
+    padding: 5px 10px;
     border: none;
     border-radius: 4px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 14px;
     transition: background-color 0.3s ease;
-    margin-top: 20px;
-    display: inline-block;
+    margin-bottom: 15px;
   }
 
-  .edit-button:hover, .logout-button:hover {
-    background-color: #e56e3c;
+  .edit-button:hover{
+    background-color: #0a345a;
   }
 
   .orders-header {
@@ -626,7 +635,7 @@ const styles = `
   }
 
   .see-all-button {
-    background-color: #075985;
+    background-color: #0D4274;
     color: white;
     padding: 5px 10px;
     border: none;
@@ -634,30 +643,38 @@ const styles = `
     cursor: pointer;
     font-size: 14px;
     transition: background-color 0.3s ease;
+    margin-bottom: 15px;
   }
 
   .see-all-button:hover {
-    background-color: #054569;
+    background-color: #0a345a;
   }
 
-  .order-history, .wishlist {
+  .order-history {
     margin-top: 30px;
     text-align: left;
   }
 
   .section-title {
-    color: #075985;
+    color: #0D4274;
     font-size: 24px;
     font-weight: 700;
     margin-bottom: 10px;
   }
 
-  .order-item, .wishlist-item {
+  .order-item {
     background-color: #ffffff;
     padding: 10px;
     border-radius: 8px;
     margin-bottom: 10px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+    height: 112px;
+    margin-bottom: 20px;
+  }
+  
+  .order-item:hover {
+    transform: translateY(-5px);
   }
 
   .modal-overlay {
@@ -704,12 +721,12 @@ const styles = `
   .modal-title {
     font-size: 24px;
     font-weight: bold;
-    color: #075985;
+    color: #0D4274;
     margin-bottom: 20px;
   }
 
   .modal-button {
-    background-color: #075985;
+    background-color: #0D4274;
     color: white;
     padding: 10px 20px;
     border: none;

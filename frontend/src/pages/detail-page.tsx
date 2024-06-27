@@ -53,7 +53,7 @@ export default function DetailsPage(){
   const Specs = () => {
     return (
       <div>
-        <p className="text-xl mb-3 font-round font-semibold text-sky-900">Specifications:</p>
+        <p className="text-xl mb-3 font-round font-semibold text-[#0D4274]">Specifications:</p>
         {specs.map((spec, idx) => (
           <div className="flex flex-row items-center mb-2 font-round gap-0.5">
             <p key={idx} className="font-semibold">{spec.FilterName}</p>
@@ -71,18 +71,18 @@ export default function DetailsPage(){
   }, [])
 
   return (
-    <div className="px-[10%] w-dvw h-full mt-7 flex flex-row justify-between gap-14">
+    <div className="px-[10%] w-dvw h-full mt-32 flex flex-row justify-between gap-14">
       <div className="w-1/2 flex justify-end">
-        <div className="w-2/3 h-fit border-2 rounded-xl border-sky-900 shadow-lg flex items-center justify-center overflow-hidden aspect-square">
+        <div className="w-2/3 h-fit border-2 rounded-xl border-[#0D4274] shadow-lg flex items-center justify-center overflow-hidden aspect-square">
           <img className="object-contain w-full h-full" src={product?.ImgUrl} alt={product?.Name} />
         </div>
       </div>
       <div className="w-1/2 mt-10 flex flex-col gap-6">
-        <p className="text-3xl font-round text-sky-900 font-semibold">{product?.Name}</p>
+        <p className="text-3xl font-round text-[#0D4274] font-semibold">{product?.Name}</p>
         <p className="text-xl font-round font-semibold">${product?.Price}</p>
         <div className="flex gap-7 items-center">
           <CountOrder order={order} setOrder={setOrder} />
-          <button className="w-32 h-10 rounded-lg bg-sky-900 text-sm font-round text-white hover:bg-sky-950" onClick={() => {
+          <button className="w-32 h-10 rounded-lg bg-[#0D4274] text-sm font-round text-white hover:bg-sky-950" onClick={() => {
             AddCartHandle()
           }}>ADD TO CART</button>
         </div>
