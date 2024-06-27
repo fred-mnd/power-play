@@ -3,7 +3,6 @@ import { Link, useNavigate } from "react-router-dom";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import Modal from "./modal"; 
-import './navbar.css';
 import axios from "axios";
 import { useUser } from "../contexts/user-context";
 
@@ -48,16 +47,16 @@ export default function Navbar() {
 
   return (
     <div>
-      <div className="navbar bg-sky-200 flex justify-between items-center px-[10%] py-2">
+      <div className="navbar bg-sky-200 flex justify-between items-center px-4 md:px-[10%] py-2 fixed top-0 w-full z-50">
         <Link className="mx-2 w-20 flex justify-center" to="/">
           <img srcSet="/src/assets/logo_shadow.png" alt="Logo" />
         </Link>
-        <div className="navbar-links">
+        <div className="navbar-links hidden md:flex gap-4">
           <Link className="navbar-link" to="/catalog">PRODUCTS</Link>
           <Link className="navbar-link" to="/about">ABOUT US</Link>
           <Link className="navbar-link" to="/support">SUPPORT</Link>
         </div>
-        <div className="navbar-icons">
+        <div className="navbar-icons flex gap-4">
           <div className="relative cursor-pointer" onClick={handleCartClick}>
             <ShoppingCartIcon className="navbar-icon" fontSize="large" />
           </div>

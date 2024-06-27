@@ -1,11 +1,12 @@
+/* navbar.css */
 .navbar {
-    width: 100vw;
     background-color: #075985; 
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1rem 10%;
-    font-family: 'Arial', sans-serif; 
+    font-family: 'Arial', sans-serif;
+    z-index: 50; 
 }
 
 .navbar img {
