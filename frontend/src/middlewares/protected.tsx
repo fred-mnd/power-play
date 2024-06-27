@@ -17,7 +17,6 @@ export default function Protected({ children }: ContentLayout) {
       setModalMessage("Please log in to access this page.");
       setShowModal(true);
     }
-
   }, []);
 
   return (

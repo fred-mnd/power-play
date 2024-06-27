@@ -6,6 +6,8 @@ import DetailsPage from '../pages/detail-page';
 import { CartPage } from '../pages/cart-page';
 import ProfilePage from '../pages/profile-page';
 import Protected from './protected';
+import AdminLayout from '../layouts/admin-layout';
+import { AdminPage } from '../pages/admin/admin-home';
 
 export default function MiddlewareRoutes() {
   return (
@@ -16,6 +18,8 @@ export default function MiddlewareRoutes() {
         <Route path="/details/:id" element={<MainLayout><DetailsPage /></MainLayout>} />
         <Route path="/cart" element={<Protected><MainLayout><CartPage /></MainLayout></Protected>} />
         <Route path="/profile" element={<Protected><MainLayout><ProfilePage /></MainLayout></Protected>} />
+        <Route path="/admin/home" element={<AdminLayout><AdminPage></AdminPage></AdminLayout>} />
+
       </Routes>
     </>
   );
