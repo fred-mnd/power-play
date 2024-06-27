@@ -54,6 +54,11 @@ func main() {
 		orders.GET("/add-order/:id", controller.AddOrder)
 		orders.GET("/get-order/:id", controller.GetOrder)
 	}
+	
+	admin := r.Group("/admin")
+	{
+		admin.GET("/get-orders", controller.GetOrderForAdmin)
+	}
 
 	r.Run(":8000")
 }

@@ -295,7 +295,7 @@ const handleSave = async () => {
                 <button className="see-all-button" onClick={() => navigate('/orders')}>See All</button>
               </div>
               <div className="flex flex-col gap-3">
-                {activeOrders.length > 0 ? (
+                {activeOrders ? (
                   activeOrders.slice(0, 3).map((order, index) => (
                     <div key={index} className="order-item flex w-full justify-between mb-2 p-4 rounded-xl shadow-md">
                       <div className="flex flex-1 items-center">
