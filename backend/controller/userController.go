@@ -4,6 +4,7 @@ import (
 	"main/database"
 	models "main/models"
 	"net/http"
+	"regexp"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -81,6 +82,34 @@ func UpdateProfileHandler(c *gin.Context) {
 		return
 	}
 
+	if input.Name != "" {
+		if len(input.Name) < 5 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Name must be more than 5 characters"})
+		return
+	}
+
+	regex := regexp.MustCompile(`^[a-zA-Z\s]+$`)
+		if !regex.MatchString(input.Name) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Name must not contain symbols or numbers"})
+		return
+	}
+	user.Name = input.Name
+	}
+
+	if input.Email != "" {
+		if !models.IsValidEmail(input.Email) {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Please provide a valid email address"})
+		return
+	}
+
+	var query models.User
+		if db.Where("email = ?", input.Email).Not("id = ?", input.UserID).First(&query).RowsAffected != 0 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "This email has been registered"})
+		return
+	}
+	user.Email = input.Email
+	}
+
 	if input.OldPassword != "" {
 		if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(input.OldPassword)); err != nil {
 			c.JSON(http.StatusBadRequest, gin.H{"error": "Old password is incorrect"})
@@ -119,6 +148,11 @@ func UpdateProfileHandler(c *gin.Context) {
 			return
 		}
 
+		if len(input.PhoneNumber) < 10 || len(input.PhoneNumber) > 13 {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Phone number must be between 10 and 13 digits long"})
+			return
+		}
+
 		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(input.NewPassword), bcrypt.DefaultCost)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not hash password"})
@@ -126,11 +160,17 @@ func UpdateProfileHandler(c *gin.Context) {
 		}
 		user.Password = string(hashedPassword)
 	}
+	if input.PhoneNumber != "" {
+  		if len(input.PhoneNumber) < 10 || len(input.PhoneNumber) > 13 {
+   			c.JSON(http.StatusBadRequest, gin.H{"error": "Phone number must be between 10 and 13 digits long"})
+   			return
+  		}
+  	user.PhoneNumber = input.PhoneNumber
+ 	}
 
-	user.Name = input.Name
-	user.Email = input.Email
-	user.PhoneNumber = input.PhoneNumber
-	user.Address = input.Address
+	if input.Address != "" {
+		user.Address = input.Address
+	}
 
 	if err := db.Save(&user).Error; err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": "Could not update user"})

@@ -31,8 +31,8 @@ const FilterDetails: React.FC<FilterNameProps> = ({ name, handleFilterChange }) 
           <p className="font-round">{name.Name}</p>
         </div>
       ) : name.FilterType === "options" && name.Options ? (
-        <div className="flex justify-between items-center gap-5">
-          <p className="font-round w-1/4">{name.Name}</p>
+        <div className="flex flex-col justify-between items-start lg:flex-row">
+          <p className="font-round w-fit">{name.Name}</p>
           <select
             className="border-[#0D4274] border rounded-md"
             onChange={(e) => handleFilterChange(name.ID, e.target.value)}
@@ -53,7 +53,7 @@ const FilterCategory: React.FC<FilterCategoryProps> = ({ filter, handleFilterCha
   return (
     <div className="bg-white rounded-lg p-4 flex flex-col gap-2 shadow-md">
       <p className="font-round text-[#0D4274] text-xl">{filter.Category}</p>
-      <hr className="border-gray-300 border-1" />
+      <hr className="border-gray-300 border-1 flex gap-3" />
       {filter.Filters.map((name) => (
         <FilterDetails key={name.Name} name={name} handleFilterChange={handleFilterChange} />
       ))}
@@ -63,7 +63,7 @@ const FilterCategory: React.FC<FilterCategoryProps> = ({ filter, handleFilterCha
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
-    <div className="relative bg-sky-50 rounded-3xl overflow-hidden shadow-lg p-3 mb-2 transition-transform transform hover:scale-105 relative w-full h-[80%] flex flex-col justify-between">
+    <div className="bg-sky-50 rounded-3xl overflow-hidden shadow-lg p-3 mb-2 transition-transform transform hover:scale-105 relative w-full h-[25rem] flex flex-col justify-between">
       <div className="flex items-center justify-center h-48">
         <img src={product.ImgUrl} alt={product.Name} className="object-cover w-[90%] mt-4"/>
       </div>
@@ -130,7 +130,7 @@ const Catalog: React.FC = () => {
         {filters.map((filter) => (
           <FilterCategory key={filter.Category} filter={filter} handleFilterChange={handleFilterChange} />
         ))}
-        <div className="pt-4 pb-2 flex gap-5">
+        <div className="pt-4 pb-2 flex gap-5 justify-center">
           <button
             className="bg-white hover:bg-sky-50 text-[#0D4274] font-bold py-2 px-5 rounded"
             onClick={fetchProducts}
@@ -146,8 +146,7 @@ const Catalog: React.FC = () => {
         </div>
       </div>
 
-      {/* Products Section */}
-      <div className="w-[100%] grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+      <div className="w-full grid gap-4 md:gap-6 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {products.map((product) => (
           <ProductCard key={product.ID} product={product} />
         ))}

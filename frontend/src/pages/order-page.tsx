@@ -62,7 +62,7 @@ const OrderPage: React.FC = () => {
                         {transaction.Status === "Delivered" ? (
                         <button className="bg-sky-900 text-white px-4 py-2 rounded-lg hover:bg-sky-950"
                         onClick={() => updateStatus(transaction.ID)}>
-                            Change Status
+                            Received
                         </button>
                         ) : null}
                     </div>

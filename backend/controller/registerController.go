@@ -84,7 +84,7 @@ func Register(c *gin.Context) {
 	}
 
 	if len(input.PhoneNumber) < 10 || len(input.PhoneNumber) > 13 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Phone number must be between 10 and 13 characters long"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Phone number must be between 10 and 13 digits long"})
 		return
 	}
 

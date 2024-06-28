@@ -5,12 +5,29 @@ import axios from "axios";
 import { FilterOption, IFilterDetails, ISpecs } from "../interfaces/filter-interface";
 import { CountOrder } from "../components/counter";
 import { useUser } from "../contexts/user-context";
+import Modal from "../components/modal";
 
 export default function DetailsPage(){
   const [product, setProduct] = useState<IProducts>()
   const [order, setOrder] = useState(1);
   const [specs, setSpecs] = useState<ISpecs[]>([])
   const { user } = useUser();
+
+  const [showModal, setShowModal] = useState(false);
+  const [modalMessage, setModalMessage] = useState("");
+
+  const handleCartClick = () => {
+    if (user) {
+      navigate('/cart');
+    } else {
+      setModalMessage("Please log in to access your cart.");
+      setShowModal(true);
+    }
+  };
+
+  const closeModal = () => {
+    setShowModal(false);
+  };
 
   const {id} = useParams()
 
@@ -83,12 +100,15 @@ export default function DetailsPage(){
         <div className="flex gap-7 items-center">
           <CountOrder order={order} setOrder={setOrder} />
           <button className="w-32 h-10 rounded-lg bg-[#0D4274] text-sm font-round text-white hover:bg-sky-950" onClick={() => {
+            user ? 
             AddCartHandle()
+            : handleCartClick()
           }}>ADD TO CART</button>
         </div>
         <p className="w-3/4">{product?.Desc}</p>
         <Specs />
       </div>
+      <Modal show={showModal} message={modalMessage} onClose={closeModal} />
     </div>
   )
 }
