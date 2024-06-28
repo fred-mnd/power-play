@@ -1,25 +1,37 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useUser } from "../contexts/user-context";
+import { IFinalTran } from "../interfaces/order-interface";
 
 const OrderPage: React.FC = () => {
   const { user } = useUser();
-  const [orders, setOrders] = useState<any[]>([]);
+  const [ordersData, setOrdersData] = useState<IFinalTran[]>([])
+
+  const fetchOrders = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8000/orders/get-complete-order/${user.ID}`);
+      if (response.status === 200) {
+        setOrdersData(response.data);
+      } else {
+        console.error('Failed to fetch orders');
+      }
+    } catch (error) {
+      console.error('Failed to fetch orders', error);
+    }
+  };
+
+  const updateStatus = async(id: number) => {
+    try {
+        const response = await axios.get(`http://localhost:8000/orders/complete/${id}`);
+        setOrdersData(response.data);
+        fetchOrders()
+    } catch (error) {
+        console.error(error);
+    }
+  }
 
   useEffect(() => {
     if (user) {
-      const fetchOrders = async () => {
-        try {
-          const response = await axios.get(`http://localhost:8000/orders/get-order/${user.ID}`);
-          if (response.status === 200) {
-            setOrders(response.data);
-          } else {
-            console.error('Failed to fetch orders');
-          }
-        } catch (error) {
-          console.error('Failed to fetch orders', error);
-        }
-      };
       fetchOrders();
     }
   }, []);
@@ -38,29 +50,36 @@ const OrderPage: React.FC = () => {
       <div className="max-w-6xl mx-auto px-4">
         <h1 className="text-4xl font-bold text-[#0D4274] my-8">Your Orders</h1>
         <div className="flex flex-col gap-4">
-          {orders.length > 0 ? (
-            orders.map((order, index) => (
-              <div key={index} className="order-item border-2 rounded-xl border-sky-800 bg-sky-50 flex w-full justify-between mb-2 p-4 rounded-xl shadow-md h-32">
-                <div className="flex flex-1 items-center">
-                  <img src={order.ImgUrl} alt={order.Name} className="w-20 h-20 object-contain mr-4 rounded-lg" />
-                  <div className="flex-1 flex flex-col justify-center">
-                    <p className="font-bold font-round text-[#0D4274]">{order.Name}</p>
-                    <p className="font-semibold font-round text-sm">Quantity: {order.Quantity}</p>
-                    <p className="font-semibold font-round text-sm">Price: ${order.Price}</p>
-                    <div className="flex items-center gap-1 font-semibold font-round text-sm">
-                      <p>Status:</p>
-                      <p className="text-[#0D4274]">{order.Status}</p>
+          {ordersData ? 
+        ordersData.map((transaction, index) => (
+                <div key={index} className="mb-6 p-4 border-2 border-sky-900 rounded-lg shadow-md">
+                    <div className="mb-4 flex justify-between items-center">
+                        <div>
+                            <h2 className="text-xl text-sky-900 font-round font-semibold">{transaction.User}</h2>
+                            <p>{new Date(transaction.TransactionDate).toLocaleString()}</p>
+                            <p>Status: {transaction.Status}</p>
+                        </div>
+                        {transaction.Status === "Delivered" ? (
+                        <button className="bg-sky-900 text-white px-4 py-2 rounded-lg hover:bg-sky-950"
+                        onClick={() => updateStatus(transaction.ID)}>
+                            Change Status
+                        </button>
+                        ) : null}
                     </div>
-                  </div>
+                    {transaction.Orders.map(order => (
+                        <div key={order.ID} className="flex mb-4 p-4 border rounded-lg shadow-sm">
+                            <img src={order.ImgUrl} alt={order.Name} className="w-24 h-24 mr-4 object-contain" />
+                            <div>
+                                <h3 className="text-lg font-semibold">{order.Name}</h3>
+                                <p>Quantity: {order.Quantity}</p>
+                            </div>
+                        </div>
+                    ))}
                 </div>
-                <div className="flex items-start justify-center">
-                  <p className="font-semibold font-round text-[#0D4274]">{formatDate(order.TransactionDate)}</p>
-                </div>
-              </div>
-            ))
-          ) : (
-            <p>No orders found</p>
-          )}
+            )) : (
+                <p>No active order.</p>
+            )
+            }
         </div>
       </div>
     </div>

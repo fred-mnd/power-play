@@ -105,6 +105,7 @@ func GetOrder(c *gin.Context){
 		Quantity int
 		Status string
 		TransactionDate time.Time
+		ID uint
 	}
 
 	var orders []Order
@@ -121,11 +122,57 @@ func GetOrder(c *gin.Context){
 				Quantity: Quantity,
 				Status: t.Status,
 				TransactionDate: t.TransactionDate,
+				ID: t.ID,
 			})
 		}
 	}
 
 	c.JSON(http.StatusOK, orders)
+}
+
+func GetCompleteOrder(c *gin.Context){
+	db := database.GetInstance()
+
+	userID := c.Param("id")
+
+	var tran []models.Transaction
+
+	type Order struct{
+		models.Product
+		Quantity int
+	}
+
+	type FinalTran struct{
+		ID uint
+		TransactionDate time.Time
+		Status string
+		Orders []Order
+	}
+
+	var finalTran []FinalTran
+
+	db.Preload("Products").Where("user_id = ?", userID).Order("transaction_date desc").Find(&tran)
+
+	for _, t := range tran {
+		var orders []Order
+		for _, p := range t.Products {
+			var Quantity int
+			db.Model(&models.TransactionDetails{}).Select("quantity").Where("transaction_id = ?", t.ID).
+			Where("product_id = ?", p.ID).Scan(&Quantity)
+			orders = append(orders, Order{
+				Product: p,
+				Quantity: Quantity,
+			})
+		}
+		finalTran = append(finalTran, FinalTran{
+			TransactionDate: t.TransactionDate,
+			Status: t.Status,
+			Orders: orders,
+			ID: t.ID,
+		})
+	}
+
+	c.JSON(http.StatusOK, finalTran)
 }
 
 func GetOrderForAdmin(c *gin.Context){
@@ -139,6 +186,7 @@ func GetOrderForAdmin(c *gin.Context){
 	}
 
 	type FinalTran struct{
+		ID uint
 		TransactionDate time.Time
 		Status string
 		User string
@@ -167,8 +215,37 @@ func GetOrderForAdmin(c *gin.Context){
 			Status: t.Status,
 			User: username,
 			Orders: orders,
+			ID: t.ID,
 		})
 	}
 
 	c.JSON(http.StatusOK, finalTran)
+}
+
+func ChangeStatus(c *gin.Context){
+	db := database.GetInstance()
+
+	tranID := c.Param("id")
+
+	var tran models.Transaction
+
+	db.First(&tran, tranID)
+
+	tran.Status = "Delivered"
+
+	db.Save(&tran)
+}
+
+func CompleteOrder(c *gin.Context){
+	db := database.GetInstance()
+
+	tranID := c.Param("id")
+
+	var tran models.Transaction
+
+	db.First(&tran, tranID)
+
+	tran.Status = "Completed"
+
+	db.Save(&tran)
 }
